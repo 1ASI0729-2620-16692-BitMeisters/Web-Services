@@ -381,7 +381,8 @@ components:
 
     InspectionItemResource:
       type: object
-      required: [id, code, name, category, isSafetyComponent, requiresEvidence, displayOrder, isActive]
+      required:
+        [id, code, name, category, isSafetyComponent, requiresEvidence, displayOrder, isActive, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -411,6 +412,14 @@ components:
         isActive:
           type: boolean
           examples: [true]
+        createdAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-01T14:00:00Z']
+        updatedAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-01T14:00:00Z']
 
     StartInspectionResource:
       type: object
