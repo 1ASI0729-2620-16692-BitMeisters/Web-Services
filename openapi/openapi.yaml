@@ -2,6 +2,9 @@ openapi: 3.1.0
 info:
   title: FleetSafe API
   version: 0.1.0
+  license:
+    name: MIT
+    identifier: MIT
   description: >-
     Pre-operational inspection and operational authorization of fleet vehicles. Each bounded
     context keeps its paths in its own file; this document gathers them.
@@ -11,7 +14,9 @@ security:
   - bearerAuth: []
 tags:
   - name: Identity and Access
+    description: Sign-in and user accounts of the company, with their roles.
   - name: Pre-Operational Inspection
+    description: Inspection item catalog and the inspections drivers perform before operating a vehicle.
 paths:
   /auth/login:
     $ref: './identity-and-access.yaml#/paths/~1auth~1login'
