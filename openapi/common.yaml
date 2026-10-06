@@ -1,0 +1,160 @@
+openapi: 3.1.0
+info:
+  title: FleetSafe API - common components
+  version: 0.1.0
+paths: {}
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    AcceptLanguage:
+      name: Accept-Language
+      in: header
+      required: false
+      description: Language of the messages returned by the API.
+      schema:
+        type: string
+        enum: [en-US, es-419]
+        default: en-US
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      required: false
+      description: Zero-based page index.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      required: false
+      description: Page size. The Web App uses 20 on desktop and 10 on mobile.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  responses:
+    BadRequest:
+      description: The request is malformed or fails validation.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: about:blank
+            title: Bad Request
+            status: 400
+            detail: The request contains invalid fields.
+            instance: /api/v1/vehicles
+            errors:
+              - field: plate
+                message: Plate is required.
+    Unauthorized:
+      description: The access token is missing, invalid or expired.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: about:blank
+            title: Unauthorized
+            status: 401
+            detail: Authentication is required to access this resource.
+    Forbidden:
+      description: The role of the authenticated user does not allow this operation.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: about:blank
+            title: Forbidden
+            status: 403
+            detail: Your role does not allow this operation.
+    NotFound:
+      description: The resource does not exist or belongs to another company.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: about:blank
+            title: Not Found
+            status: 404
+            detail: The requested resource was not found.
+    Conflict:
+      description: The request conflicts with the current state of a resource.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: about:blank
+            title: Conflict
+            status: 409
+            detail: A resource with the same unique value already exists.
+
+  schemas:
+    Problem:
+      description: Error body as defined by RFC 9457. `title` and `detail` are localized through `Accept-Language`.
+      type: object
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        errors:
+          type: array
+          items:
+            type: object
+            required: [field, message]
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+    PageMetadata:
+      type: object
+      required: [number, size, totalElements, totalPages]
+      properties:
+        number:
+          type: integer
+          examples: [0]
+        size:
+          type: integer
+          examples: [20]
+        totalElements:
+          type: integer
+          examples: [1]
+        totalPages:
+          type: integer
+          examples: [1]
+    Role:
+      type: string
+      enum: [ADMINISTRATOR, FLEET_SUPERVISOR, DRIVER]
+    VehicleStatus:
+      type: string
+      enum: [ENABLED, OBSERVED, NOT_ENABLED]
