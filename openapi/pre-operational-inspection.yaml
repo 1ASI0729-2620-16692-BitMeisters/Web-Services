@@ -1,0 +1,625 @@
+openapi: 3.1.0
+info:
+  title: FleetSafe API - Pre-Operational Inspection
+  version: 0.1.0
+paths:
+  /inspection-items:
+    get:
+      tags: [Pre-Operational Inspection]
+      operationId: getInspectionItems
+      summary: List the inspection item catalog
+      description: >-
+        Roles: any authenticated user. Returns the whole catalog ordered by displayOrder, without
+        pagination, because the checklist needs every active item at once.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/ItemCategory'
+      responses:
+        '200':
+          description: Inspection items ordered by displayOrder.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InspectionItemResource'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+
+  /inspections:
+    get:
+      tags: [Pre-Operational Inspection]
+      operationId: getInspections
+      summary: List inspections
+      description: >-
+        Roles: FLEET_SUPERVISOR sees every inspection of the company; DRIVER only sees their own,
+        and the driverId filter is ignored.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+        - name: vehicleId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: driverId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/InspectionStatus'
+        - name: from
+          in: query
+          description: Inspections started on or after this date.
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          description: Inspections started on or before this date.
+          schema:
+            type: string
+            format: date
+        - $ref: './common.yaml#/components/parameters/Page'
+        - $ref: './common.yaml#/components/parameters/Size'
+        - name: sort
+          in: query
+          description: 'Allowed fields: startedAt, completedAt.'
+          schema:
+            type: string
+            default: startedAt,desc
+      responses:
+        '200':
+          description: Page of inspections.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InspectionSummaryPage'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+    post:
+      tags: [Pre-Operational Inspection]
+      operationId: startInspection
+      summary: Start a pre-operational inspection
+      description: >-
+        Roles: DRIVER. The driver comes from the token and the vehicle from their active
+        assignment, so neither is sent. Rejected with 409 when the driver has no assigned vehicle
+        or when the vehicle already has an inspection in progress.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartInspectionResource'
+      responses:
+        '201':
+          description: Inspection started.
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InspectionResource'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '409':
+          $ref: './common.yaml#/components/responses/Conflict'
+
+  /inspections/{id}:
+    parameters:
+      - $ref: './common.yaml#/components/parameters/Id'
+    get:
+      tags: [Pre-Operational Inspection]
+      operationId: getInspectionById
+      summary: Get an inspection with its results, observations and evidences
+      description: 'Roles: FLEET_SUPERVISOR, or the DRIVER who performed it.'
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      responses:
+        '200':
+          description: The inspection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InspectionResource'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+    patch:
+      tags: [Pre-Operational Inspection]
+      operationId: completeInspection
+      summary: Complete an inspection
+      description: >-
+        Roles: the DRIVER who performed it. The only accepted change is status COMPLETED.
+        Rejected with 409 while an active item has no result, an OBSERVED or FAIL result has no
+        observation, or an item that requires evidence has none; the Problem lists them in
+        errors, with the item code as field. Completing publishes InspectionCompleted, which
+        triggers the evaluation in Evaluation and Authorization.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteInspectionResource'
+      responses:
+        '200':
+          description: Inspection completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InspectionResource'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: './common.yaml#/components/responses/Conflict'
+
+  /inspections/{id}/results:
+    parameters:
+      - $ref: './common.yaml#/components/parameters/Id'
+    post:
+      tags: [Pre-Operational Inspection]
+      operationId: registerInspectionResult
+      summary: Register the result of an inspection item
+      description: >-
+        Roles: the DRIVER who performed it, while the inspection is IN_PROGRESS. The item name and
+        category are copied into the result. Rejected with 409 when the item already has a result
+        in this inspection; use PATCH on the result to change it.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInspectionResultResource'
+      responses:
+        '201':
+          description: Result registered.
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InspectionResultResource'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: './common.yaml#/components/responses/Conflict'
+
+  /inspections/{id}/results/{resultId}:
+    parameters:
+      - $ref: './common.yaml#/components/parameters/Id'
+      - $ref: '#/components/parameters/ResultId'
+    patch:
+      tags: [Pre-Operational Inspection]
+      operationId: updateInspectionResult
+      summary: Change the result of an inspection item
+      description: >-
+        Roles: the DRIVER who performed it, while the inspection is IN_PROGRESS. Used to correct a
+        result during the review before submitting.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateInspectionResultResource'
+      responses:
+        '200':
+          description: Result updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InspectionResultResource'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: './common.yaml#/components/responses/Conflict'
+
+  /inspections/{id}/results/{resultId}/observations:
+    parameters:
+      - $ref: './common.yaml#/components/parameters/Id'
+      - $ref: '#/components/parameters/ResultId'
+    post:
+      tags: [Pre-Operational Inspection]
+      operationId: addObservation
+      summary: Add an observation to a result
+      description: >-
+        Roles: the DRIVER who performed the inspection while it is IN_PROGRESS, or a
+        FLEET_SUPERVISOR. The author comes from the token.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddObservationResource'
+      responses:
+        '201':
+          description: Observation added.
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservationResource'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: './common.yaml#/components/responses/Conflict'
+
+  /inspections/{id}/results/{resultId}/observations/{observationId}/evidences:
+    parameters:
+      - $ref: './common.yaml#/components/parameters/Id'
+      - $ref: '#/components/parameters/ResultId'
+      - $ref: '#/components/parameters/ObservationId'
+    post:
+      tags: [Pre-Operational Inspection]
+      operationId: attachEvidence
+      summary: Attach a photo as evidence of an observation
+      description: >-
+        Roles: the DRIVER who performed the inspection, while it is IN_PROGRESS. The file is sent
+        to the backend, which stores it with the external storage service and returns its URL, so
+        the client never depends on the provider. Accepted formats: JPEG and PNG, up to 5 MB.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  contentMediaType: application/octet-stream
+            encoding:
+              file:
+                contentType: image/jpeg, image/png
+      responses:
+        '201':
+          description: Evidence attached.
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidenceResource'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: './common.yaml#/components/responses/Conflict'
+
+components:
+  parameters:
+    ResultId:
+      name: resultId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ObservationId:
+      name: observationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    ItemCategory:
+      type: string
+      enum: [COMPONENT, SAFETY_COMPONENT, DOCUMENTATION]
+    InspectionStatus:
+      type: string
+      enum: [IN_PROGRESS, COMPLETED]
+    ResultValue:
+      type: string
+      enum: [OK, OBSERVED, FAIL]
+
+    InspectionItemResource:
+      type: object
+      required: [id, code, name, category, isSafetyComponent, requiresEvidence, displayOrder, isActive]
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [3f6c1d2a-8b4e-4c7f-9a1d-2e5b6c7d8e9f]
+        code:
+          type: string
+          examples: [BRK-01]
+        name:
+          type: string
+          examples: [Brake system]
+        description:
+          type: string
+          examples: [Pedal travel, braking response and absence of leaks.]
+        category:
+          $ref: '#/components/schemas/ItemCategory'
+        isSafetyComponent:
+          type: boolean
+          examples: [true]
+        requiresEvidence:
+          type: boolean
+          description: When true, an OBSERVED or FAIL result needs at least one photo.
+          examples: [true]
+        displayOrder:
+          type: integer
+          examples: [1]
+        isActive:
+          type: boolean
+          examples: [true]
+
+    StartInspectionResource:
+      type: object
+      required: [odometer]
+      properties:
+        odometer:
+          type: integer
+          minimum: 0
+          description: Odometer reading in kilometres when the inspection starts.
+          examples: [184320]
+
+    CompleteInspectionResource:
+      type: object
+      required: [status]
+      properties:
+        status:
+          const: COMPLETED
+
+    RegisterInspectionResultResource:
+      type: object
+      required: [inspectionItemId, result]
+      properties:
+        inspectionItemId:
+          type: string
+          format: uuid
+          examples: [3f6c1d2a-8b4e-4c7f-9a1d-2e5b6c7d8e9f]
+        result:
+          $ref: '#/components/schemas/ResultValue'
+
+    UpdateInspectionResultResource:
+      type: object
+      required: [result]
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultValue'
+
+    AddObservationResource:
+      type: object
+      required: [description]
+      properties:
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          examples: [The brake pedal sinks to the floor and the vehicle takes too long to stop.]
+
+    EvidenceResource:
+      type: object
+      required: [id, fileUrl, mediaType, uploadedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [9d8c7b6a-5f4e-4d3c-8b2a-1f0e9d8c7b6a]
+        fileUrl:
+          type: string
+          format: uri
+          examples: ['https://storage.fleetsafe.pe/evidences/9d8c7b6a.jpg']
+        mediaType:
+          type: string
+          enum: [image/jpeg, image/png]
+          examples: [image/jpeg]
+        uploadedAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-15T10:41:00Z']
+
+    ObservationResource:
+      type: object
+      required: [id, description, createdBy, createdAt, evidences]
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [5a4b3c2d-1e0f-4a9b-8c7d-6e5f4a3b2c1d]
+        description:
+          type: string
+          examples: [The brake pedal sinks to the floor and the vehicle takes too long to stop.]
+        createdBy:
+          type: string
+          format: uuid
+          description: User who wrote the observation (Identity and Access).
+          examples: [2c3d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f]
+        createdAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-15T10:40:00Z']
+        evidences:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvidenceResource'
+
+    InspectionResultResource:
+      type: object
+      required: [id, inspectionItemId, itemName, itemCategory, result, createdAt, observations]
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [8e7d6c5b-4a3f-4e2d-9c1b-0a9f8e7d6c5b]
+        inspectionItemId:
+          type: string
+          format: uuid
+          examples: [3f6c1d2a-8b4e-4c7f-9a1d-2e5b6c7d8e9f]
+        itemName:
+          type: string
+          description: Copied from the item when the result was registered.
+          examples: [Brake system]
+        itemCategory:
+          $ref: '#/components/schemas/ItemCategory'
+        result:
+          $ref: '#/components/schemas/ResultValue'
+        createdAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-15T10:39:00Z']
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservationResource'
+
+    InspectionResource:
+      type: object
+      required: [id, vehicleId, driverId, status, odometer, startedAt, results, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [6b5a4c3d-2e1f-4a0b-9c8d-7e6f5a4b3c2d]
+        vehicleId:
+          type: string
+          format: uuid
+          description: Vehicle of the active assignment (Fleet Management).
+          examples: [4d5e6f7a-8b9c-4d0e-af1b-2c3d4e5f6a7b]
+        driverId:
+          type: string
+          format: uuid
+          description: Driver who performed the inspection (Fleet Management).
+          examples: [2c3d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f]
+        status:
+          $ref: '#/components/schemas/InspectionStatus'
+        odometer:
+          type: integer
+          examples: [184320]
+        startedAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-15T10:38:00Z']
+        completedAt:
+          type: [string, 'null']
+          format: date-time
+          examples: ['2026-09-15T10:44:00Z']
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InspectionResultResource'
+        createdAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-15T10:38:00Z']
+        updatedAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-15T10:44:00Z']
+
+    InspectionSummaryResource:
+      type: object
+      description: An inspection without its results, with the counts the lists show.
+      required: [id, vehicleId, driverId, status, startedAt, compliantCount, observedCount, failedCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [6b5a4c3d-2e1f-4a0b-9c8d-7e6f5a4b3c2d]
+        vehicleId:
+          type: string
+          format: uuid
+          examples: [4d5e6f7a-8b9c-4d0e-af1b-2c3d4e5f6a7b]
+        driverId:
+          type: string
+          format: uuid
+          examples: [2c3d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f]
+        status:
+          $ref: '#/components/schemas/InspectionStatus'
+        startedAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-15T10:38:00Z']
+        completedAt:
+          type: [string, 'null']
+          format: date-time
+          examples: ['2026-09-15T10:44:00Z']
+        compliantCount:
+          type: integer
+          examples: [39]
+        observedCount:
+          type: integer
+          examples: [2]
+        failedCount:
+          type: integer
+          examples: [1]
+
+    InspectionSummaryPage:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/InspectionSummaryResource'
+        page:
+          $ref: './common.yaml#/components/schemas/PageMetadata'
