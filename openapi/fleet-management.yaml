@@ -1,0 +1,86 @@
+openapi: 3.1.0
+info:
+  title: FleetSafe API - Fleet Management
+  version: 0.1.0
+paths:
+  /drivers/me/vehicle-assignment:
+    get:
+      tags: [Fleet Management]
+      operationId: getMyVehicleAssignment
+      summary: Get the active vehicle assignment of the signed-in driver
+      description: >-
+        Roles: DRIVER. The driver comes from the token. A driver has at most one active
+        assignment; 404 when there is none.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      responses:
+        '200':
+          description: The active assignment, with the assigned vehicle.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignmentResource'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+
+components:
+  schemas:
+    VehicleSummaryResource:
+      type: object
+      required: [id, plate, brand, model, year, type, currentStatus]
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [4d5e6f7a-8b9c-4d0e-af1b-2c3d4e5f6a7b]
+        plate:
+          type: string
+          examples: [ABC-123]
+        brand:
+          type: string
+          examples: [Volvo]
+        model:
+          type: string
+          examples: [FH 460]
+        year:
+          type: integer
+          examples: [2022]
+        type:
+          type: string
+          examples: [Tractor unit]
+        currentStatus:
+          $ref: './common.yaml#/components/schemas/VehicleStatus'
+
+    VehicleAssignmentResource:
+      type: object
+      required: [id, driverId, assignedFrom, isActive, createdAt, vehicle]
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d]
+        driverId:
+          type: string
+          format: uuid
+          examples: [2c3d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f]
+        assignedFrom:
+          type: string
+          format: date
+          examples: ['2026-09-01']
+        assignedTo:
+          type: [string, 'null']
+          format: date
+          examples: [null]
+        isActive:
+          type: boolean
+          examples: [true]
+        createdAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-01T14:00:00Z']
+        vehicle:
+          $ref: '#/components/schemas/VehicleSummaryResource'
