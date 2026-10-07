@@ -372,6 +372,11 @@ components:
     ItemCategory:
       type: string
       enum: [COMPONENT, SAFETY_COMPONENT, DOCUMENTATION]
+    ItemSystem:
+      type: string
+      description: Vehicle system the item belongs to. The checklist is walked one system at a time.
+      enum:
+        [BRAKES, LIGHTS, TIRES_AND_SUSPENSION, ENGINE_AND_FLUIDS, CABIN, SAFETY_EQUIPMENT, BODY_AND_COUPLING, DOCUMENTATION]
     InspectionStatus:
       type: string
       enum: [IN_PROGRESS, COMPLETED]
@@ -382,7 +387,7 @@ components:
     InspectionItemResource:
       type: object
       required:
-        [id, code, name, category, isSafetyComponent, requiresEvidence, displayOrder, isActive, createdAt, updatedAt]
+        [id, code, name, category, system, isSafetyComponent, requiresEvidence, displayOrder, isActive, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -399,6 +404,8 @@ components:
           examples: [Pedal travel, braking response and absence of leaks.]
         category:
           $ref: '#/components/schemas/ItemCategory'
+        system:
+          $ref: '#/components/schemas/ItemSystem'
         isSafetyComponent:
           type: boolean
           examples: [true]
