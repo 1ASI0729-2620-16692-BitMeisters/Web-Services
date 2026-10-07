@@ -15,6 +15,8 @@ security:
 tags:
   - name: Identity and Access
     description: Sign-in and user accounts of the company, with their roles.
+  - name: Fleet Management
+    description: Vehicles, drivers and the assignment of vehicles to drivers.
   - name: Pre-Operational Inspection
     description: Inspection item catalog and the inspections drivers perform before operating a vehicle.
 paths:
@@ -24,6 +26,8 @@ paths:
     $ref: './identity-and-access.yaml#/paths/~1users'
   /users/{id}:
     $ref: './identity-and-access.yaml#/paths/~1users~1{id}'
+  /drivers/me/vehicle-assignment:
+    $ref: './fleet-management.yaml#/paths/~1drivers~1me~1vehicle-assignment'
   /inspection-items:
     $ref: './pre-operational-inspection.yaml#/paths/~1inspection-items'
   /inspections:
