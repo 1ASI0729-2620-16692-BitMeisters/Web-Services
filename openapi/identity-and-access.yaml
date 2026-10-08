@@ -1,0 +1,269 @@
+openapi: 3.1.0
+info:
+  title: FleetSafe API - Identity and Access
+  version: 0.1.0
+paths:
+  /auth/login:
+    post:
+      tags: [Identity and Access]
+      operationId: login
+      summary: Sign in
+      description: Validates the credentials and returns an access token. Public.
+      security: []
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInResource'
+      responses:
+        '200':
+          description: Credentials are valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticatedUserResource'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+
+  /users:
+    get:
+      tags: [Identity and Access]
+      operationId: getUsers
+      summary: List the users of the company
+      description: 'Roles: ADMINISTRATOR.'
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+        - name: role
+          in: query
+          schema:
+            $ref: './common.yaml#/components/schemas/Role'
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - $ref: './common.yaml#/components/parameters/Page'
+        - $ref: './common.yaml#/components/parameters/Size'
+        - name: sort
+          in: query
+          description: 'Allowed fields: lastName, email, createdAt.'
+          schema:
+            type: string
+            default: lastName,asc
+      responses:
+        '200':
+          description: Page of users.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPage'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+    post:
+      tags: [Identity and Access]
+      operationId: createUser
+      summary: Register a user
+      description: 'Roles: ADMINISTRATOR. The user is created in the company of the administrator.'
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserResource'
+      responses:
+        '201':
+          description: User created.
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '409':
+          $ref: './common.yaml#/components/responses/Conflict'
+
+  /users/{id}:
+    parameters:
+      - $ref: './common.yaml#/components/parameters/Id'
+    get:
+      tags: [Identity and Access]
+      operationId: getUserById
+      summary: Get a user
+      description: 'Roles: ADMINISTRATOR, or any user reading their own account.'
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      responses:
+        '200':
+          description: The user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+    patch:
+      tags: [Identity and Access]
+      operationId: updateUser
+      summary: Update a user, including its role and whether it is active
+      description: 'Roles: ADMINISTRATOR. Only the fields present in the body are changed.'
+      parameters:
+        - $ref: './common.yaml#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserResource'
+      responses:
+        '200':
+          description: User updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: './common.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+
+components:
+  schemas:
+    SignInResource:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          examples: [supervisor@transportesandinos.pe]
+        password:
+          type: string
+          format: password
+          examples: [S3cure!pass]
+
+    AuthenticatedUserResource:
+      type: object
+      required: [accessToken, tokenType, expiresIn, user]
+      properties:
+        accessToken:
+          type: string
+          examples: [eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.signature]
+        tokenType:
+          type: string
+          const: Bearer
+        expiresIn:
+          type: integer
+          description: Seconds until the token expires.
+          examples: [3600]
+        user:
+          $ref: '#/components/schemas/UserResource'
+
+    UserResource:
+      type: object
+      required: [id, companyId, email, firstName, lastName, role, isActive, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [7b1f6a2e-3c4d-4e5f-8a9b-0c1d2e3f4a5b]
+        companyId:
+          type: string
+          format: uuid
+          examples: [1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d]
+        email:
+          type: string
+          format: email
+          examples: [supervisor@transportesandinos.pe]
+        firstName:
+          type: string
+          examples: [Rosa]
+        lastName:
+          type: string
+          examples: [Quispe]
+        role:
+          $ref: './common.yaml#/components/schemas/Role'
+        isActive:
+          type: boolean
+          examples: [true]
+        createdAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-29T14:00:00Z']
+        updatedAt:
+          type: string
+          format: date-time
+          examples: ['2026-09-29T14:00:00Z']
+
+    CreateUserResource:
+      type: object
+      required: [email, password, firstName, lastName, role]
+      properties:
+        email:
+          type: string
+          format: email
+          examples: [driver@transportesandinos.pe]
+        password:
+          type: string
+          format: password
+          minLength: 8
+          examples: [S3cure!pass]
+        firstName:
+          type: string
+          maxLength: 100
+          examples: [Luis]
+        lastName:
+          type: string
+          maxLength: 100
+          examples: [Huamán]
+        role:
+          $ref: './common.yaml#/components/schemas/Role'
+
+    UpdateUserResource:
+      type: object
+      minProperties: 1
+      properties:
+        firstName:
+          type: string
+          maxLength: 100
+        lastName:
+          type: string
+          maxLength: 100
+        role:
+          $ref: './common.yaml#/components/schemas/Role'
+        isActive:
+          type: boolean
+
+    UserPage:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResource'
+        page:
+          $ref: './common.yaml#/components/schemas/PageMetadata'

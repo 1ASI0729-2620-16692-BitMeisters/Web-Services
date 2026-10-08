@@ -1,0 +1,48 @@
+openapi: 3.1.0
+info:
+  title: FleetSafe API
+  version: 0.1.0
+  license:
+    name: MIT
+    identifier: MIT
+  description: >-
+    Pre-operational inspection and operational authorization of fleet vehicles. Each bounded
+    context keeps its paths in its own file; this document gathers them.
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Identity and Access
+    description: Sign-in and user accounts of the company, with their roles.
+  - name: Fleet Management
+    description: Vehicles, drivers and the assignment of vehicles to drivers.
+  - name: Pre-Operational Inspection
+    description: Inspection item catalog and the inspections drivers perform before operating a vehicle.
+paths:
+  /auth/login:
+    $ref: './identity-and-access.yaml#/paths/~1auth~1login'
+  /users:
+    $ref: './identity-and-access.yaml#/paths/~1users'
+  /users/{id}:
+    $ref: './identity-and-access.yaml#/paths/~1users~1{id}'
+  /drivers/me/vehicle-assignment:
+    $ref: './fleet-management.yaml#/paths/~1drivers~1me~1vehicle-assignment'
+  /inspection-items:
+    $ref: './pre-operational-inspection.yaml#/paths/~1inspection-items'
+  /inspections:
+    $ref: './pre-operational-inspection.yaml#/paths/~1inspections'
+  /inspections/{id}:
+    $ref: './pre-operational-inspection.yaml#/paths/~1inspections~1{id}'
+  /inspections/{id}/results:
+    $ref: './pre-operational-inspection.yaml#/paths/~1inspections~1{id}~1results'
+  /inspections/{id}/results/{resultId}:
+    $ref: './pre-operational-inspection.yaml#/paths/~1inspections~1{id}~1results~1{resultId}'
+  /inspections/{id}/results/{resultId}/observations:
+    $ref: './pre-operational-inspection.yaml#/paths/~1inspections~1{id}~1results~1{resultId}~1observations'
+  /inspections/{id}/results/{resultId}/observations/{observationId}/evidences:
+    $ref: './pre-operational-inspection.yaml#/paths/~1inspections~1{id}~1results~1{resultId}~1observations~1{observationId}~1evidences'
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: './common.yaml#/components/securitySchemes/bearerAuth'
