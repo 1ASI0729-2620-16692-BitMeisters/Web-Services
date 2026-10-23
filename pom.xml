@@ -37,6 +37,7 @@
         <java.version>27</java.version>
         <springdoc.version>3.1.0</springdoc.version>
         <pluralize.version>1.0.0</pluralize.version>
+        <lombok.version>1.18.48</lombok.version>
     </properties>
     <dependencies>
         <dependency>
