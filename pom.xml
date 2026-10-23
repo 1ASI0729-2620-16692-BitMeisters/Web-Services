@@ -23,8 +23,39 @@
     </licenses>
     <developers>
         <developer>
-            <name>BitMeisters</name>
-            <url>https://github.com/1ASI0729-2620-16692-BitMeisters</url>
+            <id>CafecitoSKR</id>
+            <name>Alejandro Espino Flores</name>
+            <url>https://github.com/CafecitoSKR</url>
+            <organization>BitMeisters</organization>
+            <organizationUrl>https://github.com/1ASI0729-2620-16692-BitMeisters</organizationUrl>
+        </developer>
+        <developer>
+            <id>GeraldP03</id>
+            <name>Gerardo Valentin Palacin Lazo</name>
+            <url>https://github.com/GeraldP03</url>
+            <organization>BitMeisters</organization>
+            <organizationUrl>https://github.com/1ASI0729-2620-16692-BitMeisters</organizationUrl>
+        </developer>
+        <developer>
+            <id>Rodri2712</id>
+            <name>Rodrigo Fabrizio Aguilar Untiveros</name>
+            <url>https://github.com/Rodri2712</url>
+            <organization>BitMeisters</organization>
+            <organizationUrl>https://github.com/1ASI0729-2620-16692-BitMeisters</organizationUrl>
+        </developer>
+        <developer>
+            <id>JuanManuel312</id>
+            <name>Juan Manuel Santos Torres</name>
+            <url>https://github.com/JuanManuel312</url>
+            <organization>BitMeisters</organization>
+            <organizationUrl>https://github.com/1ASI0729-2620-16692-BitMeisters</organizationUrl>
+        </developer>
+        <developer>
+            <id>Elizabeth-Apaza</id>
+            <name>Elizabeth Noelia Apaza Bocanegra</name>
+            <url>https://github.com/Elizabeth-Apaza</url>
+            <organization>BitMeisters</organization>
+            <organizationUrl>https://github.com/1ASI0729-2620-16692-BitMeisters</organizationUrl>
         </developer>
     </developers>
     <scm>
