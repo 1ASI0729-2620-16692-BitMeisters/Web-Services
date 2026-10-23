@@ -7,17 +7,21 @@ Frontend Web Application is built against.
 ## Requirements
 
 - JDK 27
-- PostgreSQL 16 or later, with a `fleetsafe` database
+- Docker with Docker Compose, for the PostgreSQL 18 database
 
 ## Running
 
-Set the database credentials and start the application with the Maven wrapper:
+Start the database, set its credentials and run the application with the Maven wrapper:
 
 ```bash
+docker compose up -d
 export DATABASE_USER=postgres
 export DATABASE_PASSWORD=postgres
 ./mvnw spring-boot:run
 ```
+
+`compose.yaml` starts PostgreSQL 18 with a `fleetsafe` database on port 5432 and keeps its data in
+the `postgres-data` volume. The same variables run the tests: `./mvnw test`.
 
 `DATABASE_URL` defaults to `jdbc:postgresql://localhost:5432/fleetsafe`. The API documentation is
 served at `http://localhost:8080/swagger-ui.html`.
