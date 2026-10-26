@@ -55,6 +55,27 @@ The API documentation is served at `/swagger-ui/index.html` and `/v3/api-docs`.
 `DATABASE_URL` defaults to `jdbc:postgresql://localhost:5432/fleetsafe`. The API documentation is
 served at `http://localhost:8080/swagger-ui.html`.
 
+## Authentication
+
+Every endpoint except `POST /api/v1/auth/login` and the documentation requires a JWT:
+
+1. Start the application with `ADMIN_EMAIL`, `ADMIN_PASSWORD` and `ADMIN_COMPANY_ID` set; the first
+   administrator is registered at startup.
+2. Sign in:
+
+   ```bash
+   curl -X POST http://localhost:8080/api/v1/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email": "<ADMIN_EMAIL>", "password": "<ADMIN_PASSWORD>"}'
+   ```
+
+3. Send the `accessToken` of the response in every request: `Authorization: Bearer <accessToken>`.
+   In Swagger UI, press **Authorize** and paste the token.
+
+The authenticated user is available in a controller as `@AuthenticationPrincipal UserDetailsImpl`,
+with its `id`, `companyId` and role (`ROLE_ADMINISTRATOR`, `ROLE_FLEET_SUPERVISOR`, `ROLE_DRIVER`).
+Restrict an operation to a role with `@PreAuthorize("hasRole('ADMINISTRATOR')")`.
+
 ## Project structure
 
 One package per bounded context, each with the same four layers, and a `shared` package for what
