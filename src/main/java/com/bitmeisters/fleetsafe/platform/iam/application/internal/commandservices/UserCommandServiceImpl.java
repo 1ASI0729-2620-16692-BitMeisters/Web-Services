@@ -10,6 +10,7 @@ import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.ChangeUserRo
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.DeactivateUserCommand;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.RegisterUserCommand;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.SignInCommand;
+import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.UpdateUserCommand;
 import com.bitmeisters.fleetsafe.platform.iam.domain.repositories.UserRepository;
 import com.bitmeisters.fleetsafe.platform.shared.application.patterns.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -88,5 +89,22 @@ public class UserCommandServiceImpl implements UserCommandService {
         var token = tokenService.generateToken(user.get());
         log.info("User signed in: id={}", user.get().getId());
         return Result.success(new AuthenticatedUser(user.get(), token, tokenService.getExpirationInSeconds()));
+    }
+
+    @Override
+    @Transactional
+    public Result<User, UserCommandFailure> handle(UpdateUserCommand command) {
+        var user = userRepository.findById(command.userId());
+        if (user.isEmpty()) {
+            log.warn("User not found: id={}", command.userId());
+            return Result.failure(new UserCommandFailure.NotFound());
+        }
+        if (command.name() != null) user.get().rename(command.name());
+        if (command.role() != null) user.get().changeRole(command.role());
+        if (Boolean.TRUE.equals(command.active())) user.get().activate();
+        if (Boolean.FALSE.equals(command.active())) user.get().deactivate();
+        var updatedUser = userRepository.save(user.get());
+        log.info("User updated: id={}", updatedUser.getId());
+        return Result.success(updatedUser);
     }
 }

@@ -36,7 +36,10 @@ public class UserQueryServiceImpl implements UserQueryService {
 
     @Override
     public List<User> handle(GetUsersByCompanyIdQuery query) {
-        var results = userRepository.findAllByCompanyId(query.companyId());
+        var results = userRepository.findAllByCompanyId(query.companyId()).stream()
+                .filter(user -> query.role() == null || user.getRole() == query.role())
+                .filter(user -> query.active() == null || user.isActive() == query.active())
+                .toList();
         log.debug("Found {} users for companyId: {}", results.size(), query.companyId().value());
         return results;
     }

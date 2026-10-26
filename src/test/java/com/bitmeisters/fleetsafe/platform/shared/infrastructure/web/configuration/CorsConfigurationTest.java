@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -44,7 +45,7 @@ class CorsConfigurationTest {
 
     @Test
     void allowsTheLocalWebApplication() throws Exception {
-        mockMvc.perform(get("/api/v1/ping").header("Origin", "http://localhost:4200"))
+        mockMvc.perform(get("/api/v1/ping").header("Origin", "http://localhost:4200").with(user("supervisor")))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:4200"));
     }
