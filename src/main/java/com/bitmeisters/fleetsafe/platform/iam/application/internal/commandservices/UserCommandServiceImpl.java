@@ -1,12 +1,15 @@
 package com.bitmeisters.fleetsafe.platform.iam.application.internal.commandservices;
 
+import com.bitmeisters.fleetsafe.platform.iam.application.commandservices.AuthenticatedUser;
 import com.bitmeisters.fleetsafe.platform.iam.application.commandservices.UserCommandFailure;
 import com.bitmeisters.fleetsafe.platform.iam.application.commandservices.UserCommandService;
 import com.bitmeisters.fleetsafe.platform.iam.application.internal.outboundservices.hashing.HashingService;
+import com.bitmeisters.fleetsafe.platform.iam.application.internal.outboundservices.tokens.TokenService;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.aggregates.User;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.ChangeUserRoleCommand;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.DeactivateUserCommand;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.RegisterUserCommand;
+import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.SignInCommand;
 import com.bitmeisters.fleetsafe.platform.iam.domain.repositories.UserRepository;
 import com.bitmeisters.fleetsafe.platform.shared.application.patterns.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +22,12 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     private final UserRepository userRepository;
     private final HashingService hashingService;
+    private final TokenService tokenService;
 
-    public UserCommandServiceImpl(UserRepository userRepository, HashingService hashingService) {
+    public UserCommandServiceImpl(UserRepository userRepository, HashingService hashingService, TokenService tokenService) {
         this.userRepository = userRepository;
         this.hashingService = hashingService;
+        this.tokenService = tokenService;
     }
 
     @Override
@@ -67,5 +72,21 @@ public class UserCommandServiceImpl implements UserCommandService {
         var deactivatedUser = userRepository.save(user.get());
         log.info("User deactivated: id={}", deactivatedUser.getId());
         return Result.success(deactivatedUser);
+    }
+
+    @Override
+    public Result<AuthenticatedUser, UserCommandFailure> handle(SignInCommand command) {
+        var user = userRepository.findByEmail(command.email());
+        if (user.isEmpty() || !hashingService.matches(command.password(), user.get().getPasswordHash())) {
+            log.warn("Sign in rejected: invalid credentials");
+            return Result.failure(new UserCommandFailure.InvalidCredentials());
+        }
+        if (!user.get().isActive()) {
+            log.warn("Sign in rejected: inactive user id={}", user.get().getId());
+            return Result.failure(new UserCommandFailure.Inactive());
+        }
+        var token = tokenService.generateToken(user.get());
+        log.info("User signed in: id={}", user.get().getId());
+        return Result.success(new AuthenticatedUser(user.get(), token, tokenService.getExpirationInSeconds()));
     }
 }
