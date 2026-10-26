@@ -39,6 +39,16 @@ docker run -p 8080:8080 \
 
 `JAVA_OPTS` can override the JVM options; by default the heap uses up to 75% of the container memory.
 
+## Configuration
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `DATABASE_URL` | JDBC URL of the PostgreSQL database | `jdbc:postgresql://localhost:5432/fleetsafe` |
+| `DATABASE_USER` / `DATABASE_PASSWORD` | database credentials | none |
+| `CORS_ALLOWED_ORIGINS` | comma-separated origins allowed to call `/api/**` | `http://localhost:4200,https://1asi0729-2620-16692-bitmeisters.github.io` |
+
+The API documentation is served at `/swagger-ui/index.html` and `/v3/api-docs`.
+
 `DATABASE_URL` defaults to `jdbc:postgresql://localhost:5432/fleetsafe`. The API documentation is
 served at `http://localhost:8080/swagger-ui.html`.
 
