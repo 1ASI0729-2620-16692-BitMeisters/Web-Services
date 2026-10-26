@@ -3,14 +3,17 @@ package com.bitmeisters.fleetsafe.platform.evaluation;
 import com.bitmeisters.fleetsafe.platform.evaluation.application.commandservices.EvaluationCommandFailure;
 import com.bitmeisters.fleetsafe.platform.evaluation.application.commandservices.EvaluationCommandService;
 import com.bitmeisters.fleetsafe.platform.evaluation.application.commandservices.EvaluationRuleCommandService;
+import com.bitmeisters.fleetsafe.platform.evaluation.application.commandservices.OperationalAuthorizationCommandService;
 import com.bitmeisters.fleetsafe.platform.evaluation.application.queryservices.EvaluationQueryService;
 import com.bitmeisters.fleetsafe.platform.evaluation.application.queryservices.OperationalAuthorizationQueryService;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates.OperationalAuthorization;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.commands.DefineEvaluationRuleCommand;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.commands.EvaluateInspectionCommand;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.commands.LiftBlockCommand;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetAuthorizationHistoryByVehicleIdQuery;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetCurrentAuthorizationByVehicleIdQuery;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetEvaluationByInspectionIdQuery;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetOverridesByPeriodQuery;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.AuthorizationStatus;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.InspectionId;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.InspectionItemId;
@@ -25,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +50,9 @@ class EvaluationFlowIntegrationTest {
 
     @Autowired
     private OperationalAuthorizationQueryService operationalAuthorizationQueryService;
+
+    @Autowired
+    private OperationalAuthorizationCommandService operationalAuthorizationCommandService;
 
     @Test
     void evaluatesAnInspectionAndKeepsTheVehicleStatus() {
@@ -68,5 +76,15 @@ class EvaluationFlowIntegrationTest {
         assertThat(operationalAuthorizationQueryService.handle(new GetAuthorizationHistoryByVehicleIdQuery(vehicleId))).hasSize(1);
         assertThat(evaluationCommandService.handle(command).failure())
                 .get().isInstanceOf(EvaluationCommandFailure.AlreadyEvaluated.class);
+
+        var lifted = operationalAuthorizationCommandService.handle(new LiftBlockCommand(vehicleId, "Urgent delivery", UUID.randomUUID()));
+
+        assertThat(lifted.success()).get().extracting(OperationalAuthorization::getStatus).isEqualTo(AuthorizationStatus.ENABLED);
+        assertThat(operationalAuthorizationQueryService.handle(new GetCurrentAuthorizationByVehicleIdQuery(vehicleId)))
+                .get().extracting(OperationalAuthorization::isOverride).isEqualTo(true);
+        assertThat(operationalAuthorizationQueryService.handle(new GetAuthorizationHistoryByVehicleIdQuery(vehicleId))).hasSize(2);
+        var now = Instant.now();
+        assertThat(operationalAuthorizationQueryService.handle(new GetOverridesByPeriodQuery(now.minus(1, ChronoUnit.HOURS), now)))
+                .extracting(OperationalAuthorization::getVehicleId).contains(vehicleId);
     }
 }
