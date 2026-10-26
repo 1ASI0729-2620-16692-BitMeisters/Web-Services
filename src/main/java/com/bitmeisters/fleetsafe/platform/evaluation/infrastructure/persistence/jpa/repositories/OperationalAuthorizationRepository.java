@@ -5,6 +5,7 @@ import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.V
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,4 +16,6 @@ public interface OperationalAuthorizationRepository extends JpaRepository<Operat
     Optional<OperationalAuthorization> findFirstByVehicleIdOrderByAuthorizedAtDesc(VehicleId vehicleId);
 
     List<OperationalAuthorization> findAllByVehicleIdOrderByAuthorizedAtDesc(VehicleId vehicleId);
+
+    List<OperationalAuthorization> findAllByOverrideTrueAndAuthorizedAtBetweenOrderByAuthorizedAtDesc(Instant from, Instant to);
 }

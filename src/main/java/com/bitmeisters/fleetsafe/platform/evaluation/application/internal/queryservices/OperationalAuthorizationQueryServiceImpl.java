@@ -4,6 +4,7 @@ import com.bitmeisters.fleetsafe.platform.evaluation.application.queryservices.O
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates.OperationalAuthorization;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetAuthorizationHistoryByVehicleIdQuery;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetCurrentAuthorizationByVehicleIdQuery;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetOverridesByPeriodQuery;
 import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories.OperationalAuthorizationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,14 @@ public class OperationalAuthorizationQueryServiceImpl implements OperationalAuth
     public List<OperationalAuthorization> handle(GetAuthorizationHistoryByVehicleIdQuery query) {
         var results = operationalAuthorizationRepository.findAllByVehicleIdOrderByAuthorizedAtDesc(query.vehicleId());
         log.debug("Found {} authorizations for vehicleId: {}", results.size(), query.vehicleId().value());
+        return results;
+    }
+
+    @Override
+    public List<OperationalAuthorization> handle(GetOverridesByPeriodQuery query) {
+        var results = operationalAuthorizationRepository
+                .findAllByOverrideTrueAndAuthorizedAtBetweenOrderByAuthorizedAtDesc(query.from(), query.to());
+        log.debug("Found {} overrides between {} and {}", results.size(), query.from(), query.to());
         return results;
     }
 }
