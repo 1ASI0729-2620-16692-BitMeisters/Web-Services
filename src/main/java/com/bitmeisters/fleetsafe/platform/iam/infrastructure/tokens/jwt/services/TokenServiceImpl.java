@@ -1,6 +1,6 @@
 package com.bitmeisters.fleetsafe.platform.iam.infrastructure.tokens.jwt.services;
 
-import com.bitmeisters.fleetsafe.platform.iam.application.internal.outboundservices.tokens.TokenService;
+import com.bitmeisters.fleetsafe.platform.iam.infrastructure.tokens.jwt.BearerTokenService;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.aggregates.User;
 import com.bitmeisters.fleetsafe.platform.shared.domain.model.valueobjects.Timestamps;
 import io.jsonwebtoken.Claims;
@@ -8,9 +8,11 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -18,7 +20,10 @@ import java.util.Date;
 
 @Slf4j
 @Service
-public class TokenServiceImpl implements TokenService {
+public class TokenServiceImpl implements BearerTokenService {
+
+    private static final String AUTHORIZATION_PARAMETER_NAME = "Authorization";
+    private static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
     private final SecretKey signingKey;
     private final long expirationInSeconds;
@@ -67,5 +72,14 @@ public class TokenServiceImpl implements TokenService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser().verifyWith(signingKey).build().parseSignedClaims(token).getPayload();
+    }
+
+    @Override
+    public String getBearerTokenFrom(HttpServletRequest request) {
+        var authorizationParameter = request.getHeader(AUTHORIZATION_PARAMETER_NAME);
+        if (StringUtils.hasText(authorizationParameter) && authorizationParameter.startsWith(BEARER_TOKEN_PREFIX)) {
+            return authorizationParameter.substring(BEARER_TOKEN_PREFIX.length());
+        }
+        return null;
     }
 }
