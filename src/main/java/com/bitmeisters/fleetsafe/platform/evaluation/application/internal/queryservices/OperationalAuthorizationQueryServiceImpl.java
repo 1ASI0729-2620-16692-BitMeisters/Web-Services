@@ -5,7 +5,7 @@ import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates.Ope
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetAuthorizationHistoryByVehicleIdQuery;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetCurrentAuthorizationByVehicleIdQuery;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetOverridesByPeriodQuery;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories.OperationalAuthorizationRepository;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.repositories.OperationalAuthorizationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

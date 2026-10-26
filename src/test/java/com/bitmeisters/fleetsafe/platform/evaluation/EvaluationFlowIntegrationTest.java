@@ -14,6 +14,7 @@ import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetAut
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetCurrentAuthorizationByVehicleIdQuery;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetEvaluationByInspectionIdQuery;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetOverridesByPeriodQuery;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.events.InspectionEvaluatedEvent;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.AuthorizationStatus;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.InspectionId;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.InspectionItemId;
@@ -26,6 +27,8 @@ import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.V
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -37,7 +40,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
+@RecordApplicationEvents
 class EvaluationFlowIntegrationTest {
+
+    @Autowired
+    private ApplicationEvents applicationEvents;
+
 
     @Autowired
     private EvaluationRuleCommandService evaluationRuleCommandService;
@@ -69,6 +77,8 @@ class EvaluationFlowIntegrationTest {
         var authorization = evaluationCommandService.handle(command);
 
         assertThat(authorization.success()).get().extracting(OperationalAuthorization::getStatus).isEqualTo(AuthorizationStatus.NOT_ENABLED);
+        assertThat(applicationEvents.stream(InspectionEvaluatedEvent.class))
+                .containsExactly(new InspectionEvaluatedEvent(inspectionId, vehicleId, AuthorizationStatus.NOT_ENABLED));
         assertThat(evaluationQueryService.handle(new GetEvaluationByInspectionIdQuery(inspectionId)))
                 .get().satisfies(evaluation -> assertThat(evaluation.getDetails()).hasSize(1));
         assertThat(operationalAuthorizationQueryService.handle(new GetCurrentAuthorizationByVehicleIdQuery(vehicleId)))

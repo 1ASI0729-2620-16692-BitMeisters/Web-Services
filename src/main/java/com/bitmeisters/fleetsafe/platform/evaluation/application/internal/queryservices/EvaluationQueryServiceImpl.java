@@ -3,7 +3,7 @@ package com.bitmeisters.fleetsafe.platform.evaluation.application.internal.query
 import com.bitmeisters.fleetsafe.platform.evaluation.application.queryservices.EvaluationQueryService;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates.Evaluation;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetEvaluationByInspectionIdQuery;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories.EvaluationRepository;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.repositories.EvaluationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
