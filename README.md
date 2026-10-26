@@ -23,6 +23,22 @@ export DATABASE_PASSWORD=postgres
 `compose.yaml` starts PostgreSQL 18 with a `fleetsafe` database on port 5432 and keeps its data in
 the `postgres-data` volume. The same variables run the tests: `./mvnw test`.
 
+## Docker image
+
+The `Dockerfile` builds the application with JDK 27 and runs it on a JRE 27 Alpine image as a
+non-root user, listening on port 8080:
+
+```bash
+docker build -t fleetsafe-api .
+docker run -p 8080:8080 \
+  -e DATABASE_URL=jdbc:postgresql://<host>:5432/fleetsafe \
+  -e DATABASE_USER=<user> \
+  -e DATABASE_PASSWORD=<password> \
+  fleetsafe-api
+```
+
+`JAVA_OPTS` can override the JVM options; by default the heap uses up to 75% of the container memory.
+
 `DATABASE_URL` defaults to `jdbc:postgresql://localhost:5432/fleetsafe`. The API documentation is
 served at `http://localhost:8080/swagger-ui.html`.
 
