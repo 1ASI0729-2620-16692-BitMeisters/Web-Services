@@ -1,47 +1,28 @@
 package com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates;
 
-import com.bitmeisters.fleetsafe.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import com.bitmeisters.fleetsafe.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.commands.DefineEvaluationRuleCommand;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.InspectionItemId;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.ResultValue;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.RuleImpact;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.RuleName;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.converters.InspectionItemIdAttributeConverter;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.converters.RuleNameAttributeConverter;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.Getter;
 
+import java.time.Instant;
+import java.util.UUID;
+
 @Getter
-@Entity
-public class EvaluationRule extends AuditableAbstractAggregateRoot<EvaluationRule> {
+public class EvaluationRule extends AbstractDomainAggregateRoot<EvaluationRule> {
 
-    @Column(nullable = false)
-    @Convert(converter = InspectionItemIdAttributeConverter.class)
+    private UUID id;
     private InspectionItemId inspectionItemId;
-
-    @Column(nullable = false, length = RuleName.MAX_LENGTH)
-    @Convert(converter = RuleNameAttributeConverter.class)
     private RuleName name;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     private ResultValue foundResult;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     private RuleImpact resultingImpact;
-
-    @Column(columnDefinition = "text")
     private String description;
-
-    @Column(name = "is_active", nullable = false)
     private boolean active;
-
-    protected EvaluationRule() {}
+    private Instant createdAt;
+    private Instant updatedAt;
 
     public EvaluationRule(DefineEvaluationRuleCommand command) {
         this.inspectionItemId = command.inspectionItemId();
@@ -50,6 +31,17 @@ public class EvaluationRule extends AuditableAbstractAggregateRoot<EvaluationRul
         this.resultingImpact = command.resultingImpact();
         this.description = command.description();
         this.active = true;
+    }
+
+    public static EvaluationRule restore(UUID id, InspectionItemId inspectionItemId, RuleName name, ResultValue foundResult,
+                                         RuleImpact resultingImpact, String description, boolean active,
+                                         Instant createdAt, Instant updatedAt) {
+        var rule = new EvaluationRule(new DefineEvaluationRuleCommand(inspectionItemId, name, foundResult, resultingImpact, description));
+        rule.id = id;
+        rule.active = active;
+        rule.createdAt = createdAt;
+        rule.updatedAt = updatedAt;
+        return rule;
     }
 
     public void deactivate() {

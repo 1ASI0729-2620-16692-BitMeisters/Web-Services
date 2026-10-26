@@ -8,7 +8,7 @@ import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.I
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.ResultValue;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.RuleImpact;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.RuleName;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories.EvaluationRuleRepository;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.repositories.EvaluationRuleRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
