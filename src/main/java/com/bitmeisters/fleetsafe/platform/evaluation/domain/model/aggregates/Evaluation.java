@@ -1,6 +1,7 @@
 package com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates;
 
 import com.bitmeisters.fleetsafe.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import com.bitmeisters.fleetsafe.platform.shared.domain.model.valueobjects.Timestamps;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.commands.EvaluateInspectionCommand;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.entities.EvaluationDetail;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.InspectionId;
@@ -40,7 +41,7 @@ public class Evaluation extends AuditableAbstractAggregateRoot<Evaluation> {
 
     public Evaluation(EvaluateInspectionCommand command, List<EvaluationRule> activeRules) {
         this.inspectionId = command.inspectionId();
-        this.evaluatedAt = Instant.now();
+        this.evaluatedAt = Timestamps.now();
         this.evaluatedBy = command.evaluatedBy();
         command.results().forEach(result -> applyMatchingRule(result, activeRules));
     }

@@ -1,6 +1,7 @@
 package com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates;
 
 import com.bitmeisters.fleetsafe.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import com.bitmeisters.fleetsafe.platform.shared.domain.model.valueobjects.Timestamps;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.commands.LiftBlockCommand;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.events.InspectionEvaluatedEvent;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.AuthorizationStatus;
@@ -52,7 +53,7 @@ public class OperationalAuthorization extends AuditableAbstractAggregateRoot<Ope
         this.status = AuthorizationStatus.fromImpact(evaluation.resolveMostRestrictiveImpact());
         this.override = false;
         this.authorizedBy = evaluation.getEvaluatedBy();
-        this.authorizedAt = Instant.now();
+        this.authorizedAt = Timestamps.now();
         addDomainEvent(new InspectionEvaluatedEvent(evaluation.getInspectionId(), vehicleId, status));
     }
 
@@ -66,7 +67,7 @@ public class OperationalAuthorization extends AuditableAbstractAggregateRoot<Ope
         this.override = true;
         this.overrideReason = command.reason();
         this.authorizedBy = command.authorizedBy();
-        this.authorizedAt = Instant.now();
+        this.authorizedAt = Timestamps.now();
     }
 
     public boolean isBlocked() {
