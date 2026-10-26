@@ -46,6 +46,8 @@ docker run -p 8080:8080 \
 | `DATABASE_URL` | JDBC URL of the PostgreSQL database | `jdbc:postgresql://localhost:5432/fleetsafe` |
 | `DATABASE_USER` / `DATABASE_PASSWORD` | database credentials | none |
 | `CORS_ALLOWED_ORIGINS` | comma-separated origins allowed to call `/api/**` | `http://localhost:4200,https://1asi0729-2620-16692-bitmeisters.github.io` |
+| `JWT_SECRET` | secret that signs the access tokens, at least 32 bytes. **Set it in every deployment**: the default is only for local development | a fixed development value |
+| `JWT_EXPIRATION_SECONDS` | lifetime of an access token | `86400` (one day) |
 
 The API documentation is served at `/swagger-ui/index.html` and `/v3/api-docs`.
 
