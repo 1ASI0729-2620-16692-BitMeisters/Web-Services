@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Locale;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,7 +40,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorResponse handleException(IllegalArgumentException exception, Locale locale) {
         String messageKey = exception.getMessage() != null ? exception.getMessage() : "errors.found";
-        String message = Objects.requireNonNullElse(messageSource.getMessage(messageKey, null, locale), messageKey);
+        String message = messageSource.getMessage(messageKey, null, messageKey, locale);
         log.warn("Illegal argument: {}", message);
         return ErrorResponse.create(exception, HttpStatusCode.valueOf(HttpStatus.BAD_REQUEST.value()), message);
     }
