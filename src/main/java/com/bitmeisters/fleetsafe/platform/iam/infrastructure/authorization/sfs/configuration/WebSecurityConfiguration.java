@@ -13,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -22,13 +23,16 @@ public class WebSecurityConfiguration {
     private final UserDetailsService userDetailsService;
     private final BearerTokenService tokenService;
     private final AuthenticationEntryPoint unauthorizedRequestHandler;
+    private final AccessDeniedHandler forbiddenRequestHandler;
 
     public WebSecurityConfiguration(@Qualifier("defaultUserDetailsService") UserDetailsService userDetailsService,
                                     BearerTokenService tokenService,
-                                    AuthenticationEntryPoint authenticationEntryPoint) {
+                                    AuthenticationEntryPoint authenticationEntryPoint,
+                                    AccessDeniedHandler accessDeniedHandler) {
         this.userDetailsService = userDetailsService;
         this.tokenService = tokenService;
         this.unauthorizedRequestHandler = authenticationEntryPoint;
+        this.forbiddenRequestHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -40,7 +44,9 @@ public class WebSecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults());
         http.csrf(csrfConfigurer -> csrfConfigurer.disable())
-                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedRequestHandler))
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(unauthorizedRequestHandler)
+                        .accessDeniedHandler(forbiddenRequestHandler))
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
