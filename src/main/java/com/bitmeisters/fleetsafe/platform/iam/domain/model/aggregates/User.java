@@ -56,4 +56,12 @@ public class User extends AbstractDomainAggregateRoot<User> {
     public void deactivate() {
         this.active = false;
     }
+
+    public void activate() {
+        this.active = true;
+    }
+
+    public void rename(PersonName name) {
+        this.name = name;
+    }
 }
