@@ -19,6 +19,8 @@ tags:
     description: Vehicles, drivers and the assignment of vehicles to drivers.
   - name: Pre-Operational Inspection
     description: Inspection item catalog and the inspections drivers perform before operating a vehicle.
+  - name: Evaluation and Authorization
+    description: Evaluation rules, evaluation of inspections and the operational authorization of each vehicle.
 paths:
   /auth/login:
     $ref: './identity-and-access.yaml#/paths/~1auth~1login'
@@ -42,6 +44,22 @@ paths:
     $ref: './pre-operational-inspection.yaml#/paths/~1inspections~1{id}~1results~1{resultId}~1observations'
   /inspections/{id}/results/{resultId}/observations/{observationId}/evidences:
     $ref: './pre-operational-inspection.yaml#/paths/~1inspections~1{id}~1results~1{resultId}~1observations~1{observationId}~1evidences'
+  /inspections/{id}/evaluate:
+    $ref: './evaluation-and-authorization.yaml#/paths/~1inspections~1{id}~1evaluate'
+  /vehicles/{id}/status:
+    $ref: './evaluation-and-authorization.yaml#/paths/~1vehicles~1{id}~1status'
+  /vehicles/{id}/authorizations:
+    $ref: './evaluation-and-authorization.yaml#/paths/~1vehicles~1{id}~1authorizations'
+  /vehicles/{id}/block-lifts:
+    $ref: './evaluation-and-authorization.yaml#/paths/~1vehicles~1{id}~1block-lifts'
+  /operational-authorizations/overrides:
+    $ref: './evaluation-and-authorization.yaml#/paths/~1operational-authorizations~1overrides'
+  /evaluation-rules:
+    $ref: './evaluation-and-authorization.yaml#/paths/~1evaluation-rules'
+  /evaluation-rules/{id}:
+    $ref: './evaluation-and-authorization.yaml#/paths/~1evaluation-rules~1{id}'
+  /evaluation-rules/{id}/deactivation:
+    $ref: './evaluation-and-authorization.yaml#/paths/~1evaluation-rules~1{id}~1deactivation'
 components:
   securitySchemes:
     bearerAuth:
