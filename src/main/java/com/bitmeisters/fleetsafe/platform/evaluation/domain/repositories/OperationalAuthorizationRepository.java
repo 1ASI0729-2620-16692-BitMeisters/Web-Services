@@ -1,21 +1,19 @@
-package com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories;
+package com.bitmeisters.fleetsafe.platform.evaluation.domain.repositories;
 
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates.OperationalAuthorization;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.VehicleId;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-@Repository
-public interface OperationalAuthorizationRepository extends JpaRepository<OperationalAuthorization, UUID> {
+public interface OperationalAuthorizationRepository {
 
     Optional<OperationalAuthorization> findFirstByVehicleIdOrderByAuthorizedAtDesc(VehicleId vehicleId);
 
     List<OperationalAuthorization> findAllByVehicleIdOrderByAuthorizedAtDesc(VehicleId vehicleId);
 
     List<OperationalAuthorization> findAllByOverrideTrueAndAuthorizedAtBetweenOrderByAuthorizedAtDesc(Instant from, Instant to);
+
+    OperationalAuthorization save(OperationalAuthorization authorization);
 }

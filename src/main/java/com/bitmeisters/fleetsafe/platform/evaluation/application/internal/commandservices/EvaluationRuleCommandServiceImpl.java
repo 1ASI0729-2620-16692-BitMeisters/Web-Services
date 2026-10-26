@@ -5,7 +5,7 @@ import com.bitmeisters.fleetsafe.platform.evaluation.application.commandservices
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates.EvaluationRule;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.commands.DeactivateEvaluationRuleCommand;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.commands.DefineEvaluationRuleCommand;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories.EvaluationRuleRepository;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.repositories.EvaluationRuleRepository;
 import com.bitmeisters.fleetsafe.platform.shared.application.patterns.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

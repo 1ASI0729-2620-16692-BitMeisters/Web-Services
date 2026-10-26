@@ -1,51 +1,33 @@
 package com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates;
 
-import com.bitmeisters.fleetsafe.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import com.bitmeisters.fleetsafe.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.bitmeisters.fleetsafe.platform.shared.domain.model.valueobjects.Timestamps;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.commands.LiftBlockCommand;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.events.InspectionEvaluatedEvent;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.AuthorizationStatus;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.VehicleId;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.converters.VehicleIdAttributeConverter;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-@Entity
-public class OperationalAuthorization extends AuditableAbstractAggregateRoot<OperationalAuthorization> {
+public class OperationalAuthorization extends AbstractDomainAggregateRoot<OperationalAuthorization> {
 
-    @Column(nullable = false)
+    private UUID id;
     private UUID evaluationId;
-
-    @Column(nullable = false)
-    @Convert(converter = VehicleIdAttributeConverter.class)
     private VehicleId vehicleId;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     private AuthorizationStatus status;
-
-    @Column(name = "is_override", nullable = false)
     private boolean override;
-
-    @Column(columnDefinition = "text")
     private String overrideReason;
-
     private UUID authorizedBy;
-
-    @Column(nullable = false)
     private Instant authorizedAt;
-
     private Instant validUntil;
+    private Instant createdAt;
+    private Instant updatedAt;
 
-    protected OperationalAuthorization() {}
+    private OperationalAuthorization() {
+    }
 
     public OperationalAuthorization(Evaluation evaluation, VehicleId vehicleId) {
         this.evaluationId = evaluation.getId();
@@ -54,7 +36,7 @@ public class OperationalAuthorization extends AuditableAbstractAggregateRoot<Ope
         this.override = false;
         this.authorizedBy = evaluation.getEvaluatedBy();
         this.authorizedAt = Timestamps.now();
-        addDomainEvent(new InspectionEvaluatedEvent(evaluation.getInspectionId(), vehicleId, status));
+        registerDomainEvent(new InspectionEvaluatedEvent(evaluation.getInspectionId(), vehicleId, status));
     }
 
     public OperationalAuthorization(OperationalAuthorization blocked, LiftBlockCommand command) {
@@ -68,6 +50,25 @@ public class OperationalAuthorization extends AuditableAbstractAggregateRoot<Ope
         this.overrideReason = command.reason();
         this.authorizedBy = command.authorizedBy();
         this.authorizedAt = Timestamps.now();
+    }
+
+    public static OperationalAuthorization restore(UUID id, UUID evaluationId, VehicleId vehicleId, AuthorizationStatus status,
+                                                   boolean override, String overrideReason, UUID authorizedBy,
+                                                   Instant authorizedAt, Instant validUntil,
+                                                   Instant createdAt, Instant updatedAt) {
+        var authorization = new OperationalAuthorization();
+        authorization.id = id;
+        authorization.evaluationId = evaluationId;
+        authorization.vehicleId = vehicleId;
+        authorization.status = status;
+        authorization.override = override;
+        authorization.overrideReason = overrideReason;
+        authorization.authorizedBy = authorizedBy;
+        authorization.authorizedAt = authorizedAt;
+        authorization.validUntil = validUntil;
+        authorization.createdAt = createdAt;
+        authorization.updatedAt = updatedAt;
+        return authorization;
     }
 
     public boolean isBlocked() {

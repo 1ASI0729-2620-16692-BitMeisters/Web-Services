@@ -4,7 +4,7 @@ import com.bitmeisters.fleetsafe.platform.evaluation.application.commandservices
 import com.bitmeisters.fleetsafe.platform.evaluation.application.commandservices.OperationalAuthorizationCommandService;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates.OperationalAuthorization;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.commands.LiftBlockCommand;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories.OperationalAuthorizationRepository;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.repositories.OperationalAuthorizationRepository;
 import com.bitmeisters.fleetsafe.platform.shared.application.patterns.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

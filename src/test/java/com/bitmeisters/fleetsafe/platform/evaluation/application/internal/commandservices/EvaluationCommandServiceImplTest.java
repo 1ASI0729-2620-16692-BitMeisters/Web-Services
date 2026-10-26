@@ -15,9 +15,9 @@ import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.R
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.RuleImpact;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.RuleName;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.valueobjects.VehicleId;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories.EvaluationRepository;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories.EvaluationRuleRepository;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories.OperationalAuthorizationRepository;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.repositories.EvaluationRepository;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.repositories.EvaluationRuleRepository;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.repositories.OperationalAuthorizationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

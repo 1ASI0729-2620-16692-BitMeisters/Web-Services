@@ -4,7 +4,7 @@ import com.bitmeisters.fleetsafe.platform.evaluation.application.queryservices.E
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.aggregates.EvaluationRule;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetActiveEvaluationRulesQuery;
 import com.bitmeisters.fleetsafe.platform.evaluation.domain.model.queries.GetEvaluationRuleByIdQuery;
-import com.bitmeisters.fleetsafe.platform.evaluation.infrastructure.persistence.jpa.repositories.EvaluationRuleRepository;
+import com.bitmeisters.fleetsafe.platform.evaluation.domain.repositories.EvaluationRuleRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
