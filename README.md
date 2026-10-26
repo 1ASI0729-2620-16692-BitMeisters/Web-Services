@@ -114,5 +114,7 @@ public sealed interface InspectionCommandFailure permits InspectionCommandFailur
   carries a `messageKey`, and the interface layer turns it into a `ProblemDetail` with its status.
 - Every message has its key in `messages.properties` (English) and `messages_es_419.properties`
   (Spanish), resolved from the `Accept-Language` header.
+- The current time comes from `Timestamps.now()`, never from `Instant.now()`: it is truncated to
+  microseconds, the precision PostgreSQL stores, so a date in memory equals the stored one.
 - Endpoints live under `/api/v1`.
 - Commits follow Conventional Commits, scoped to the bounded context: `feat(inspection): …`.
