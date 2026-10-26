@@ -2,6 +2,7 @@ package com.bitmeisters.fleetsafe.platform.iam.application.internal.commandservi
 
 import com.bitmeisters.fleetsafe.platform.iam.application.commandservices.UserCommandFailure;
 import com.bitmeisters.fleetsafe.platform.iam.application.commandservices.UserCommandService;
+import com.bitmeisters.fleetsafe.platform.iam.application.internal.outboundservices.hashing.HashingService;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.aggregates.User;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.ChangeUserRoleCommand;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.DeactivateUserCommand;
@@ -17,9 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserCommandServiceImpl implements UserCommandService {
 
     private final UserRepository userRepository;
+    private final HashingService hashingService;
 
-    public UserCommandServiceImpl(UserRepository userRepository) {
+    public UserCommandServiceImpl(UserRepository userRepository, HashingService hashingService) {
         this.userRepository = userRepository;
+        this.hashingService = hashingService;
     }
 
     @Override
@@ -29,7 +32,7 @@ public class UserCommandServiceImpl implements UserCommandService {
             log.warn("Email already registered: companyId={}", command.companyId().value());
             return Result.failure(new UserCommandFailure.EmailAlreadyRegistered());
         }
-        var user = userRepository.save(new User(command));
+        var user = userRepository.save(new User(command, hashingService.encode(command.password())));
         log.info("User registered: id={}, companyId={}, role={}", user.getId(), command.companyId().value(), command.role());
         return Result.success(user);
     }

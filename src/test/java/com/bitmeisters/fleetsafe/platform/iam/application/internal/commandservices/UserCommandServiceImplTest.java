@@ -1,6 +1,7 @@
 package com.bitmeisters.fleetsafe.platform.iam.application.internal.commandservices;
 
 import com.bitmeisters.fleetsafe.platform.iam.application.commandservices.UserCommandFailure;
+import com.bitmeisters.fleetsafe.platform.iam.application.internal.outboundservices.hashing.HashingService;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.aggregates.User;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.ChangeUserRoleCommand;
 import com.bitmeisters.fleetsafe.platform.iam.domain.model.commands.DeactivateUserCommand;
@@ -31,24 +32,29 @@ class UserCommandServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private HashingService hashingService;
+
     @InjectMocks
     private UserCommandServiceImpl userCommandService;
 
     private final RegisterUserCommand registerSupervisor = new RegisterUserCommand(
             new CompanyId(UUID.randomUUID()),
             new EmailAddress("supervisor@transportesandinos.pe"),
-            "$2a$10$hash",
+            "S3cure!pass",
             new PersonName("Rosa", "Quispe"),
             Role.FLEET_SUPERVISOR);
 
     @Test
-    void registersAUserWithANewEmail() {
+    void registersAUserWithANewEmailAndKeepsOnlyTheHashOfItsPassword() {
         when(userRepository.existsByEmail(registerSupervisor.email())).thenReturn(false);
+        when(hashingService.encode("S3cure!pass")).thenReturn("$2a$10$hash");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = userCommandService.handle(registerSupervisor);
 
         assertThat(result.success()).get().extracting(User::getRole).isEqualTo(Role.FLEET_SUPERVISOR);
+        assertThat(result.success()).get().extracting(User::getPasswordHash).isEqualTo("$2a$10$hash");
     }
 
     @Test
@@ -59,12 +65,13 @@ class UserCommandServiceImplTest {
 
         assertThat(result.failure()).get().isInstanceOf(UserCommandFailure.EmailAlreadyRegistered.class);
         verify(userRepository, never()).save(any());
+        verify(hashingService, never()).encode(any());
     }
 
     @Test
     void changesTheRoleOfAnExistingUser() {
         var id = UUID.randomUUID();
-        when(userRepository.findById(id)).thenReturn(Optional.of(new User(registerSupervisor)));
+        when(userRepository.findById(id)).thenReturn(Optional.of(new User(registerSupervisor, "$2a$10$hash")));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = userCommandService.handle(new ChangeUserRoleCommand(id, Role.ADMINISTRATOR));
@@ -84,7 +91,7 @@ class UserCommandServiceImplTest {
 
     @Test
     void rejectsDeactivatingAUserTwice() {
-        var user = new User(registerSupervisor);
+        var user = new User(registerSupervisor, "$2a$10$hash");
         user.deactivate();
         var id = UUID.randomUUID();
         when(userRepository.findById(id)).thenReturn(Optional.of(user));

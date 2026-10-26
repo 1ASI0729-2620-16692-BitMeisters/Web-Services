@@ -24,20 +24,26 @@ public class User extends AbstractDomainAggregateRoot<User> {
     private Instant createdAt;
     private Instant updatedAt;
 
-    public User(RegisterUserCommand command) {
-        this.companyId = command.companyId();
-        this.email = command.email();
-        this.passwordHash = command.passwordHash();
-        this.name = command.name();
-        this.role = command.role();
-        this.active = true;
+    private User(CompanyId companyId, EmailAddress email, String passwordHash, PersonName name, Role role, boolean active) {
+        if (passwordHash == null || passwordHash.isBlank()) {
+            throw new IllegalArgumentException("iam.user.error.password.required");
+        }
+        this.companyId = companyId;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.name = name;
+        this.role = role;
+        this.active = active;
+    }
+
+    public User(RegisterUserCommand command, String passwordHash) {
+        this(command.companyId(), command.email(), passwordHash, command.name(), command.role(), true);
     }
 
     public static User restore(UUID id, CompanyId companyId, EmailAddress email, String passwordHash,
                                PersonName name, Role role, boolean active, Instant createdAt, Instant updatedAt) {
-        var user = new User(new RegisterUserCommand(companyId, email, passwordHash, name, role));
+        var user = new User(companyId, email, passwordHash, name, role, active);
         user.id = id;
-        user.active = active;
         user.createdAt = createdAt;
         user.updatedAt = updatedAt;
         return user;

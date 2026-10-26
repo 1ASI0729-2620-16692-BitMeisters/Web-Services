@@ -19,9 +19,9 @@ class UserTest {
         return new User(new RegisterUserCommand(
                 new CompanyId(UUID.randomUUID()),
                 new EmailAddress("supervisor@transportesandinos.pe"),
-                "$2a$10$hash",
+                "S3cure!pass",
                 new PersonName("Rosa", "Quispe"),
-                Role.FLEET_SUPERVISOR));
+                Role.FLEET_SUPERVISOR), "$2a$10$hash");
     }
 
     @Test
@@ -63,6 +63,15 @@ class UserTest {
         assertThat(user.getId()).isEqualTo(id);
         assertThat(user.isActive()).isFalse();
         assertThat(user.getCreatedAt()).isEqualTo(created);
+    }
+
+    @Test
+    void rejectsAPasswordShorterThanEightCharacters() {
+        assertThatThrownBy(() -> new RegisterUserCommand(
+                new CompanyId(UUID.randomUUID()), new EmailAddress("driver@transportesandinos.pe"),
+                "short", new PersonName("Luis", "Huamán"), Role.DRIVER))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("iam.user.error.password.size");
     }
 
     @Test
