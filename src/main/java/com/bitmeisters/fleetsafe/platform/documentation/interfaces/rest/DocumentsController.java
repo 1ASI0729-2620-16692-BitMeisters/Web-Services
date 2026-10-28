@@ -1,6 +1,5 @@
 package com.bitmeisters.fleetsafe.platform.documentation.interfaces.rest;
 
-import com.bitmeisters.fleetsafe.platform.documentation.application.internal.outboundservices.calendar.DocumentationCalendar;
 import com.bitmeisters.fleetsafe.platform.documentation.application.queryservices.VehicleDocumentQueryService;
 import com.bitmeisters.fleetsafe.platform.documentation.domain.model.aggregates.VehicleDocument;
 import com.bitmeisters.fleetsafe.platform.documentation.domain.model.queries.GetExpiringDocumentsQuery;
@@ -28,12 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class DocumentsController {
 
     private final VehicleDocumentQueryService vehicleDocumentQueryService;
-    private final DocumentationCalendar documentationCalendar;
 
-    public DocumentsController(VehicleDocumentQueryService vehicleDocumentQueryService,
-                               DocumentationCalendar documentationCalendar) {
+    public DocumentsController(VehicleDocumentQueryService vehicleDocumentQueryService) {
         this.vehicleDocumentQueryService = vehicleDocumentQueryService;
-        this.documentationCalendar = documentationCalendar;
     }
 
     @GetMapping
@@ -46,7 +42,7 @@ public class DocumentsController {
             @ApiResponse(responseCode = "403", description = "The role does not allow this operation")})
     public ResponseEntity<?> getVehicleDocuments() {
         return ResponseEntityFromVehicleDocumentQueryResultAssembler.toResponseEntityFromList(
-                vehicleDocumentQueryService.handle(new GetVehicleDocumentsQuery()), documentationCalendar.today());
+                vehicleDocumentQueryService.handle(new GetVehicleDocumentsQuery()));
     }
 
     @GetMapping("/expiring")
@@ -61,6 +57,6 @@ public class DocumentsController {
             @ApiResponse(responseCode = "403", description = "The role does not allow this operation")})
     public ResponseEntity<?> getExpiringDocuments(@RequestParam(defaultValue = "" + VehicleDocument.ALERT_DAYS) int days) {
         return ResponseEntityFromVehicleDocumentQueryResultAssembler.toResponseEntityFromList(
-                vehicleDocumentQueryService.handle(new GetExpiringDocumentsQuery(days)), documentationCalendar.today());
+                vehicleDocumentQueryService.handle(new GetExpiringDocumentsQuery(days)));
     }
 }

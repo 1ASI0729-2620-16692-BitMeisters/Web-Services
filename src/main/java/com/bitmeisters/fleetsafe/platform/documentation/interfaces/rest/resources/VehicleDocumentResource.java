@@ -22,8 +22,6 @@ public record VehicleDocumentResource(
         LocalDate expirationDate,
         @Schema(description = "Validity derived from the expiration date", example = "VALID", allowableValues = {"VALID", "EXPIRING", "EXPIRED"})
         String status,
-        @Schema(description = "Days left until the expiration date; negative once expired", example = "78")
-        long daysUntilExpiration,
         @Schema(description = "Optional link to the scanned document", example = "https://storage.example.com/documents/soat-2026-004512.pdf")
         String fileUrl,
         @Schema(description = "When the document was registered", example = "2026-10-28T14:00:00Z")

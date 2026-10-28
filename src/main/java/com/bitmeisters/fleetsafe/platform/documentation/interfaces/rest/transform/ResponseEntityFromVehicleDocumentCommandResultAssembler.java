@@ -9,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDate;
-
 public class ResponseEntityFromVehicleDocumentCommandResultAssembler {
 
     private static HttpStatus statusFromFailure(VehicleDocumentCommandFailure failure) {
@@ -27,11 +25,10 @@ public class ResponseEntityFromVehicleDocumentCommandResultAssembler {
     public static ResponseEntity<?> toResponseEntityFromResult(
             Result<VehicleDocument, VehicleDocumentCommandFailure> result,
             MessageSource messageSource,
-            HttpStatus successStatus,
-            LocalDate today) {
+            HttpStatus successStatus) {
         return result.fold(
                 vehicleDocument -> new ResponseEntity<>(
-                        VehicleDocumentResourceFromEntityAssembler.toResourceFromEntity(vehicleDocument, today),
+                        VehicleDocumentResourceFromEntityAssembler.toResourceFromEntity(vehicleDocument),
                         successStatus),
                 failure -> {
                     var status = statusFromFailure(failure);

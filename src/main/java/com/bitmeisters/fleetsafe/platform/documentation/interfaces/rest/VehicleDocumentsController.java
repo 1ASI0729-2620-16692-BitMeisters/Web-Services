@@ -1,7 +1,6 @@
 package com.bitmeisters.fleetsafe.platform.documentation.interfaces.rest;
 
 import com.bitmeisters.fleetsafe.platform.documentation.application.commandservices.VehicleDocumentCommandService;
-import com.bitmeisters.fleetsafe.platform.documentation.application.internal.outboundservices.calendar.DocumentationCalendar;
 import com.bitmeisters.fleetsafe.platform.documentation.application.queryservices.VehicleDocumentQueryService;
 import com.bitmeisters.fleetsafe.platform.documentation.domain.model.queries.GetDocumentsByVehicleIdQuery;
 import com.bitmeisters.fleetsafe.platform.documentation.domain.model.valueobjects.VehicleId;
@@ -41,16 +40,13 @@ public class VehicleDocumentsController {
 
     private final VehicleDocumentCommandService vehicleDocumentCommandService;
     private final VehicleDocumentQueryService vehicleDocumentQueryService;
-    private final DocumentationCalendar documentationCalendar;
     private final MessageSource messageSource;
 
     public VehicleDocumentsController(VehicleDocumentCommandService vehicleDocumentCommandService,
                                       VehicleDocumentQueryService vehicleDocumentQueryService,
-                                      DocumentationCalendar documentationCalendar,
                                       MessageSource messageSource) {
         this.vehicleDocumentCommandService = vehicleDocumentCommandService;
         this.vehicleDocumentQueryService = vehicleDocumentQueryService;
-        this.documentationCalendar = documentationCalendar;
         this.messageSource = messageSource;
     }
 
@@ -66,7 +62,7 @@ public class VehicleDocumentsController {
     public ResponseEntity<?> registerVehicleDocument(@PathVariable UUID vehicleId, @Valid @RequestBody SaveVehicleDocumentResource resource) {
         var command = RegisterVehicleDocumentCommandFromResourceAssembler.toCommandFromResource(vehicleId, resource);
         return ResponseEntityFromVehicleDocumentCommandResultAssembler.toResponseEntityFromResult(
-                vehicleDocumentCommandService.handle(command), messageSource, HttpStatus.CREATED, documentationCalendar.today());
+                vehicleDocumentCommandService.handle(command), messageSource, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -77,8 +73,7 @@ public class VehicleDocumentsController {
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = VehicleDocumentResource.class))))})
     public ResponseEntity<?> getDocumentsByVehicle(@PathVariable UUID vehicleId) {
         return ResponseEntityFromVehicleDocumentQueryResultAssembler.toResponseEntityFromList(
-                vehicleDocumentQueryService.handle(new GetDocumentsByVehicleIdQuery(new VehicleId(vehicleId))),
-                documentationCalendar.today());
+                vehicleDocumentQueryService.handle(new GetDocumentsByVehicleIdQuery(new VehicleId(vehicleId))));
     }
 
     @PutMapping("/{documentId}")
@@ -95,6 +90,6 @@ public class VehicleDocumentsController {
                                                    @Valid @RequestBody SaveVehicleDocumentResource resource) {
         var command = UpdateVehicleDocumentCommandFromResourceAssembler.toCommandFromResource(vehicleId, documentId, resource);
         return ResponseEntityFromVehicleDocumentCommandResultAssembler.toResponseEntityFromResult(
-                vehicleDocumentCommandService.handle(command), messageSource, HttpStatus.OK, documentationCalendar.today());
+                vehicleDocumentCommandService.handle(command), messageSource, HttpStatus.OK);
     }
 }

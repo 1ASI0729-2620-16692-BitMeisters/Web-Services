@@ -110,7 +110,6 @@ class VehicleDocumentsControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.vehicleId").value(truck.toString()))
                 .andExpect(jsonPath("$.status").value("EXPIRING"))
-                .andExpect(jsonPath("$.daysUntilExpiration").value(10))
                 .andExpect(jsonPath("$.expirationDate").value(today.plusDays(10).toString()));
 
         mockMvc.perform(get("/api/v1/vehicles/{vehicleId}/documents", truck).header("Authorization", driver))
