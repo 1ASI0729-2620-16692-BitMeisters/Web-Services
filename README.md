@@ -49,6 +49,7 @@ docker run -p 8080:8080 \
 | `JWT_SECRET` | secret that signs the access tokens, at least 32 bytes. **Set it in every deployment**: the default is only for local development | a fixed development value |
 | `JWT_EXPIRATION_SECONDS` | lifetime of an access token | `86400` (one day) |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_COMPANY_ID` | first administrator, registered at startup if no user has that email. Nothing is seeded unless the three are set | none |
+| `DOCUMENTATION_TIME_ZONE` | time zone that decides which day is today for the validity of vehicle documents and for their daily recalculation at 05:00 | `America/Lima` |
 
 The API documentation is served at `/swagger-ui/index.html` and `/v3/api-docs`.
 

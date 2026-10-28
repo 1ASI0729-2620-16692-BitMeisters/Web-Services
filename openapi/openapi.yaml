@@ -21,6 +21,8 @@ tags:
     description: Inspection item catalog and the inspections drivers perform before operating a vehicle.
   - name: Evaluation and Authorization
     description: Evaluation rules, evaluation of inspections and the operational authorization of each vehicle.
+  - name: Vehicle Documentation
+    description: Document types and the documents of each vehicle, with their validity.
 paths:
   /auth/login:
     $ref: './identity-and-access.yaml#/paths/~1auth~1login'
@@ -60,6 +62,16 @@ paths:
     $ref: './evaluation-and-authorization.yaml#/paths/~1evaluation-rules~1{id}'
   /evaluation-rules/{id}/deactivation:
     $ref: './evaluation-and-authorization.yaml#/paths/~1evaluation-rules~1{id}~1deactivation'
+  /document-types:
+    $ref: './vehicle-documentation.yaml#/paths/~1document-types'
+  /vehicles/{vehicleId}/documents:
+    $ref: './vehicle-documentation.yaml#/paths/~1vehicles~1{vehicleId}~1documents'
+  /vehicles/{vehicleId}/documents/{documentId}:
+    $ref: './vehicle-documentation.yaml#/paths/~1vehicles~1{vehicleId}~1documents~1{documentId}'
+  /documents:
+    $ref: './vehicle-documentation.yaml#/paths/~1documents'
+  /documents/expiring:
+    $ref: './vehicle-documentation.yaml#/paths/~1documents~1expiring'
 components:
   securitySchemes:
     bearerAuth:
