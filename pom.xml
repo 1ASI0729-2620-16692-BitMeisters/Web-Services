@@ -66,7 +66,7 @@
     </scm>
     <properties>
         <java.version>27</java.version>
-        <springdoc.version>3.1.0</springdoc.version>
+        <springdoc.version>3.2.0</springdoc.version>
         <pluralize.version>1.0.0</pluralize.version>
         <lombok.version>1.18.48</lombok.version>
     </properties>
@@ -85,7 +85,7 @@
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-webmvc-scalar</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
 
