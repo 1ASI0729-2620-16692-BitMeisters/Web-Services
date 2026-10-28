@@ -335,7 +335,7 @@ components:
 
     VehicleDocumentResource:
       type: object
-      required: [id, vehicleId, documentTypeId, number, issueDate, expirationDate, status, daysUntilExpiration, createdAt, updatedAt]
+      required: [id, vehicleId, documentTypeId, number, issueDate, expirationDate, status, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -362,10 +362,6 @@ components:
           examples: ['2027-01-14']
         status:
           $ref: '#/components/schemas/DocumentStatus'
-        daysUntilExpiration:
-          type: integer
-          description: Days left until the expiration date; negative once expired.
-          examples: [78]
         fileUrl:
           type: [string, 'null']
           examples: ['https://storage.example.com/documents/soat-2026-004512.pdf']
