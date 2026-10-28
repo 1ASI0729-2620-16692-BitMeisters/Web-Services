@@ -1,4 +1,4 @@
-package com.bitmeisters.fleetsafe.platform.fleet.domain.valueobjects;
+package com.bitmeisters.fleetsafe.platform.fleet.domain.model.valueobjects;
 
 import java.util.regex.Pattern;
 
