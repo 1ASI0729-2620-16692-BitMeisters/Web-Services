@@ -1,4 +1,4 @@
-package com.bitmeisters.fleetsafe.platform.fleet.domain.queries;
+package com.bitmeisters.fleetsafe.platform.fleet.domain.model.queries;
 
 import java.util.UUID;
 

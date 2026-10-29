@@ -1,4 +1,4 @@
-package com.bitmeisters.fleetsafe.platform.fleet.interfaces.rest.resource;
+package com.bitmeisters.fleetsafe.platform.fleet.interfaces.rest.resources;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
