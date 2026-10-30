@@ -30,18 +30,18 @@ public record RegisterVehicleResource(
         @Schema(
                 description = "Brand of the vehicle",
                 example = "Volvo",
-                maxLength = 30,
+                maxLength = 60,
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message = "{fleet.vehicle.error.brand.required}")
-        @Size(max = 30, message = "{fleet.vehicle.error.brand.size}")
+        @Size(max = 60, message = "{fleet.vehicle.error.brand.size}")
         String brand,
         @Schema(
                 description = "Model of the vehicle",
                 example = "FH 460",
-                maxLength = 30,
+                maxLength = 60,
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message = "{fleet.vehicle.error.model.required}")
-        @Size(max = 30, message = "{fleet.vehicle.error.model.size}")
+        @Size(max = 60, message = "{fleet.vehicle.error.model.size}")
         String model,
         @Schema(
                 description = "Manufacturing year, from 1950 up to next year",
