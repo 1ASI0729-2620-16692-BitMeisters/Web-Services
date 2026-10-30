@@ -1,4 +1,6 @@
 package com.bitmeisters.fleetsafe.platform.incident.interfaces.rest.controllers;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.bitmeisters.fleetsafe.platform.incident.application.commandservices.IncidentCommandFailure;
 import com.bitmeisters.fleetsafe.platform.incident.application.commandservices.IncidentCommandService;
@@ -32,6 +34,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/incidents")
+@Tag(name = "Incident Operations", description = "Repairs, follow-ups and corrective actions associated with incidents.")
 public class IncidentOperationsController {
 
     private final IncidentCommandService commandService;
@@ -53,6 +56,7 @@ public class IncidentOperationsController {
         this.messageSource = messageSource;
     }
 
+    @Operation(summary = "Register a corrective action")
     @PostMapping("/{incidentId}/corrective-actions")
     public ResponseEntity<?> registerCorrectiveAction(
             @PathVariable UUID incidentId,
@@ -76,6 +80,7 @@ public class IncidentOperationsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(resource);
     }
 
+    @Operation(summary = "Register a repair")
     @PostMapping("/{incidentId}/repairs")
     public ResponseEntity<?> scheduleRepair(
             @PathVariable UUID incidentId,
@@ -99,6 +104,7 @@ public class IncidentOperationsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(resource);
     }
 
+    @Operation(summary = "Mark a repair as completed")
     @PatchMapping("/{incidentId}/repairs/{repairId}/complete")
     public ResponseEntity<?> completeRepair(
             @PathVariable UUID incidentId,
@@ -124,6 +130,7 @@ public class IncidentOperationsController {
         return ResponseEntity.ok(resource);
     }
 
+    @Operation(summary = "Register an incident follow-up")
     @PostMapping("/{incidentId}/follow-ups")
     public ResponseEntity<?> addFollowUp(
             @PathVariable UUID incidentId,

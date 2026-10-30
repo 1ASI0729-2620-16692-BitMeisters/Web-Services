@@ -1,4 +1,6 @@
 package com.bitmeisters.fleetsafe.platform.incident.interfaces.rest.controllers;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.bitmeisters.fleetsafe.platform.incident.application.commandservices.IncidentTypeCommandFailure;
 import com.bitmeisters.fleetsafe.platform.incident.application.commandservices.IncidentTypeCommandService;
@@ -31,6 +33,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/incident-types")
+@Tag(name = "Incident Types", description = "Catalog of the types of incidents that may affect a vehicle.")
 public class IncidentTypeController {
 
     private final IncidentTypeCommandService commandService;
@@ -49,6 +52,7 @@ public class IncidentTypeController {
         this.assembler = new IncidentTypeAssembler();
     }
 
+    @Operation(summary = "List incident types")
     @GetMapping
     public ResponseEntity<Map<String, List<IncidentTypeResource>>> getAll(
             @RequestParam(defaultValue = "false") boolean activeOnly
@@ -62,6 +66,7 @@ public class IncidentTypeController {
         return ResponseEntity.ok(Map.of("incidentTypes", incidentTypes));
     }
 
+    @Operation(summary = "Get an incident type")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(
             @PathVariable UUID id,
@@ -79,6 +84,7 @@ public class IncidentTypeController {
                 ));
     }
 
+    @Operation(summary = "Register an incident type")
     @PostMapping
     public ResponseEntity<?> register(
             @RequestBody RegisterIncidentTypeCommand command,
@@ -101,6 +107,7 @@ public class IncidentTypeController {
                 .body(assembler.toResourceFromEntity(incidentType));
     }
 
+    @Operation(summary = "Update an incident type")
     @PutMapping("/{id}")
     public ResponseEntity<?> update(
             @PathVariable UUID id,

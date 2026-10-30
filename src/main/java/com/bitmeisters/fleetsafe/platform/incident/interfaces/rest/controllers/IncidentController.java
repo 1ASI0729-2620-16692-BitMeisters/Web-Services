@@ -1,4 +1,6 @@
 package com.bitmeisters.fleetsafe.platform.incident.interfaces.rest.controllers;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.bitmeisters.fleetsafe.platform.incident.application.commandservices.IncidentCommandFailure;
 import com.bitmeisters.fleetsafe.platform.incident.application.commandservices.IncidentCommandService;
@@ -41,6 +43,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/incidents")
+@Tag(name = "Incidents", description = "Registration, tracking and resolution of vehicle incidents.")
 public class IncidentController {
 
     private final IncidentCommandService commandService;
@@ -59,6 +62,7 @@ public class IncidentController {
         this.assembler = new IncidentAssembler();
     }
 
+    @Operation(summary = "List all incidents")
     @GetMapping
     public ResponseEntity<Map<String, List<IncidentResource>>> getAll() {
         List<IncidentResource> incidents = queryService
@@ -70,6 +74,7 @@ public class IncidentController {
         return ResponseEntity.ok(Map.of("incidents", incidents));
     }
 
+    @Operation(summary = "Get an incident")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(
             @PathVariable UUID id,
@@ -81,6 +86,7 @@ public class IncidentController {
                 .orElseGet(() -> notFound("incident.error.not-found", locale));
     }
 
+    @Operation(summary = "List incidents of a vehicle")
     @GetMapping("/vehicle/{vehicleId}")
     public ResponseEntity<Map<String, List<IncidentResource>>> getByVehicle(
             @PathVariable UUID vehicleId
@@ -94,6 +100,7 @@ public class IncidentController {
         return ResponseEntity.ok(Map.of("incidents", incidents));
     }
 
+    @Operation(summary = "List incidents by status")
     @GetMapping("/status/{status}")
     public ResponseEntity<Map<String, List<IncidentResource>>> getByStatus(
             @PathVariable IncidentStatus status
@@ -107,6 +114,7 @@ public class IncidentController {
         return ResponseEntity.ok(Map.of("incidents", incidents));
     }
 
+    @Operation(summary = "Search incidents")
     @GetMapping("/search")
     public ResponseEntity<Map<String, List<IncidentResource>>> search(
             @RequestParam UUID vehicleId
@@ -120,6 +128,7 @@ public class IncidentController {
         return ResponseEntity.ok(Map.of("incidents", incidents));
     }
 
+    @Operation(summary = "Report an incident")
     @PostMapping
     public ResponseEntity<?> report(
             @RequestBody ReportIncidentCommand command,
@@ -142,6 +151,7 @@ public class IncidentController {
                 .body(toResource(incident));
     }
 
+    @Operation(summary = "Update an incident")
     @PutMapping("/{id}")
     public ResponseEntity<?> update(
             @PathVariable UUID id,
@@ -167,6 +177,7 @@ public class IncidentController {
         );
     }
 
+    @Operation(summary = "Resolve an incident")
     @PatchMapping("/{id}/resolve")
     public ResponseEntity<?> resolve(
             @PathVariable UUID id,
@@ -192,6 +203,7 @@ public class IncidentController {
         );
     }
 
+    @Operation(summary = "Delete an incident")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(
             @PathVariable UUID id,
